@@ -9,10 +9,6 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Nataliia Kumeiko"]
   spec.email         = ["nkumeiko@gmail.com"]
 
-  if spec.respond_to?(:metadata)
-    spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com' to prevent pushes to rubygems.org, or delete to allow pushes to any server."
-  end
-
   spec.summary       = "An easy way to index sitemap and search through it. Based on Amazon CloudSearch."
   spec.homepage      = "http://slatestudio.com"
   spec.license       = "MIT"
