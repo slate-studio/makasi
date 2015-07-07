@@ -15,6 +15,10 @@ class Makasi::Config
     rails_config.sitemap_url
   end
 
+  def self.website_url
+    rails_config.website_url
+  end
+
   def self.cloudsearch_api_version
     rails_config.cloudsearch_api_version.presence || "2013-01-01"
   end

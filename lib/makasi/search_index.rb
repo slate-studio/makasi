@@ -6,37 +6,41 @@ class Makasi::SearchIndex
     sync_db_with_sitemap
 
     CloudSearchDocument.desc(:reindexed_at).each do |cloudsearch_doc|
-      doc = Nokogiri::HTML(load_page(cloudsearch_doc.url))
+      html_doc = Nokogiri::HTML(load_page(cloudsearch_doc.url))
 
       if Rails.logger.debug?
         Rails.logger.debug ">>> URL: "              + cloudsearch_doc.url +
-                           "\n\tTITLE: "            + title_of(doc) +
-                           "\n\tCONTENT: "          + content_of(doc)[0..300] +
-                           "\n\tAUTHOR: "           + meta_tag_for(doc, "author") +
-                           "\n\tCONTENT_LANGUAGE: " + language_of(doc) +
-                           "\n\tDESCRIPTION: "      + meta_tag_for(doc, "description")[0..300] +
-                           "\n\tKEYWORDS: "         + meta_tag_for(doc, "keywords") +
-                           "\n\tRESOURCE_TYPE: "    + meta_tag_for(doc, "resource_type") +
-                           "\n\tRESOURCE_NAME: "    + resource_name_of(doc) +
-                           "\n\tRESOURCE_ID: "      + meta_tag_for(doc, "resource_id") +
+                           "\n\tTITLE: "            + title_of(html_doc) +
+                           "\n\tCONTENT: "          + content_of(html_doc)[0..300] +
+                           "\n\tAUTHOR: "           + meta_tag_for(html_doc, "author") +
+                           "\n\tCONTENT_LANGUAGE: " + language_of(html_doc) +
+                           "\n\tDESCRIPTION: "      + meta_tag_for(html_doc, "description")[0..300] +
+                           "\n\tKEYWORDS: "         + meta_tag_for(html_doc, "keywords") +
+                           "\n\tRESOURCE_TYPE: "    + meta_tag_for(html_doc, "resource_type") +
+                           "\n\tRESOURCE_NAME: "    + resource_name_of(html_doc) +
+                           "\n\tRESOURCE_ID: "      + meta_tag_for(html_doc, "resource_id") +
                            "\n"
       end
 
-      asari.add_item(cloudsearch_doc.url, {
-        url:              cloudsearch_doc.url,
-        title:            title_of(doc)[0..MAX_TEXT_SIZE],
-        content:          content_of(doc)[0..MAX_TEXT_SIZE],
-        author:           meta_tag_for(doc, "author")[0..MAX_TEXT_SIZE],
-        content_language: language_of(doc)[0..MAX_LITERAL_SIZE],
-        description:      meta_tag_for(doc, "description")[0..MAX_TEXT_SIZE],
-        keywords:         meta_tag_for(doc, "keywords").split(",").map(&:strip),
-        resource_type:    meta_tag_for(doc, "resource_type")[0..MAX_TEXT_SIZE],
-        resource_name:    resource_name_of(doc)[0..MAX_TEXT_SIZE],
-        resource_id:      meta_tag_for(doc, "resource_id")[0..MAX_TEXT_SIZE]
-      })
+      add_item_to_cloudsearch(cloudsearch_doc, html_doc)
 
       cloudsearch_doc.update_attributes(reindexed_at: DateTime.now)
     end
+  end
+
+  def add_item_to_cloudsearch(cloudsearch_doc, html_doc)
+    asari.add_item(cloudsearch_doc.url, {
+      url:              cloudsearch_doc.url,
+      title:            title_of(html_doc)[0..MAX_TEXT_SIZE],
+      content:          content_of(html_doc)[0..MAX_TEXT_SIZE],
+      author:           meta_tag_for(html_doc, "author")[0..MAX_TEXT_SIZE],
+      content_language: language_of(html_doc)[0..MAX_LITERAL_SIZE],
+      description:      meta_tag_for(html_doc, "description")[0..MAX_TEXT_SIZE],
+      keywords:         meta_tag_for(html_doc, "keywords").split(",").map(&:strip),
+      resource_type:    meta_tag_for(html_doc, "resource_type")[0..MAX_TEXT_SIZE],
+      resource_name:    resource_name_of(html_doc)[0..MAX_TEXT_SIZE],
+      resource_id:      meta_tag_for(html_doc, "resource_id")[0..MAX_TEXT_SIZE]
+    })
   end
 
   def sync_db_with_sitemap
@@ -65,7 +69,7 @@ class Makasi::SearchIndex
     ## Patch for indexing from localhost
     if Rails.env.development?
       url += "/" unless url.ends_with?("/")
-      url.gsub! "www.marketshare.com", "localhost:3000"
+      url.gsub! Makasi::Config.website_url, "localhost:3000"
     end
 
     parsed_url = URI.parse(url)
