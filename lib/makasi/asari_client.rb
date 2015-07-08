@@ -9,7 +9,8 @@ module Makasi
     end
 
     def search(query, params={})
-      asari.search(query, params)
+      default_params = { return_fields: Makasi::Config.asari_return_fields }
+      asari.search(query, default_params.merge(params))
     end
 
     def search_resource_ids(query, resource_type)

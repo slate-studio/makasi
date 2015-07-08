@@ -7,7 +7,8 @@ module Makasi
       sync_db_with_sitemap
 
       CloudSearchDocument.desc(:reindexed_at).each do |cloudsearch_doc|
-        html_doc = Nokogiri::HTML(load_page(cloudsearch_doc.url))
+        html_content = load_page(cloudsearch_doc.url)
+        html_doc = Nokogiri::HTML(html_content)
 
         if Rails.logger.debug?
           Rails.logger.debug ">>> URL: "              + cloudsearch_doc.url +
@@ -49,7 +50,7 @@ module Makasi
       url_nodes = Nokogiri::XML(read_sitemap).css('url loc')
 
       url_nodes.each do |url_node|
-        cloudsearch_doc = CloudSearchDocument.find_or_initialize_by(url: url_node.text)
+        cloudsearch_doc = CloudSearchDocument.find_or_initialize_by(url: url_node.text.strip)
         cloudsearch_doc.update_attributes(present_in_sitemap: true)
       end
 
@@ -70,7 +71,7 @@ module Makasi
       ## Patch for indexing from localhost
       if Rails.env.development?
         url += "/" unless url.ends_with?("/")
-        url.gsub! Makasi::Config.website_url, "localhost:3000"
+        url.gsub! Makasi::Config.website_url, "http://localhost:3000/"
       end
 
       parsed_url = URI.parse(url)
@@ -105,7 +106,7 @@ module Makasi
     end
 
     def content_of(doc)
-      content_nodes = doc.css("[data-indexable]")
+      content_nodes = doc.css(Makasi::Config.content_selector)
       if content_nodes.present?
         extract_text(content_nodes)
       else
@@ -134,7 +135,7 @@ module Makasi
     end
 
     def resource_name_of(doc)
-      content_nodes = doc.css("[data-title]")
+      content_nodes = doc.css(Makasi::Config.resource_name_selector)
       if content_nodes.present?
         HTMLEntities.new.decode content_nodes.map(&:text).join(" ")
       else

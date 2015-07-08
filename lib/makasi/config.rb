@@ -20,6 +20,14 @@ module Makasi
       rails_config.website_url
     end
 
+    def self.content_selector
+      rails_config.content_selector || "[data-indexable]"
+    end
+
+    def self.resource_name_selector
+      rails_config.resource_name_selector || "[data-title]"
+    end
+
     def self.cloudsearch_api_version
       rails_config.cloudsearch_api_version.presence || "2013-01-01"
     end
