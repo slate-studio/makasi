@@ -1,1 +1,5 @@
 /pkg
+.DS_Store
+.idea
+/*.tmproj
+**.swp
