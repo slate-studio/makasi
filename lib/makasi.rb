@@ -1,3 +1,4 @@
+require "asari"
 require "makasi/asari_client"
 require "makasi/asari_result"
 require "makasi/config"

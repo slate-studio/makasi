@@ -1,0 +1,32 @@
+PATH
+  remote: .
+  specs:
+    makasi (0.1.3)
+      asari
+      sitemap_generator
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    asari (0.11.0)
+      httparty
+    builder (3.2.2)
+    httparty (0.13.5)
+      json (~> 1.8)
+      multi_xml (>= 0.5.2)
+    json (1.8.3)
+    multi_xml (0.5.5)
+    rake (10.4.2)
+    sitemap_generator (5.0.5)
+      builder
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 1.8)
+  makasi!
+  rake (~> 10.0)
+
+BUNDLED WITH
+   1.10.5
