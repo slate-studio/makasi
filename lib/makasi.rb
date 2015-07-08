@@ -1,4 +1,5 @@
 require "asari"
+require "makasi/asari_patch"
 require_relative "../app/models/cloud_search_document"
 require "makasi/asari_client"
 require "makasi/asari_result"
