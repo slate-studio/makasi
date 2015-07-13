@@ -5,7 +5,7 @@ module Makasi
 
     def reindex
       sync_db_with_sitemap
-
+      puts "End Sync, starting parse and uploading pages"
       CloudSearchDocument.desc(:reindexed_at).each do |cloudsearch_doc|
         html_content = load_page(cloudsearch_doc.url)
         html_doc = Nokogiri::HTML(html_content)
@@ -23,7 +23,7 @@ module Makasi
                              "\n\tRESOURCE_ID: "      + meta_tag_for(html_doc, "resource_id") +
                              "\n"
         end
-
+        puts cloudsearch_doc.url
         add_item_to_cloudsearch(cloudsearch_doc, html_doc)
 
         cloudsearch_doc.update_attributes(reindexed_at: DateTime.now)
@@ -68,15 +68,18 @@ module Makasi
         return ""
       end
 
-      ## Patch for indexing from localhost
-      if Rails.env.development?
-        url += "/" unless url.ends_with?("/")
-        url.gsub! Makasi::Config.website_url, "http://localhost:3000/"
-      end
 
-      parsed_url = URI.parse(url)
-      request = Net::HTTP::Get.new(url)
-      response = Net::HTTP.start(parsed_url.host, parsed_url.port) { |http| http.request(request) }
+       if url.start_with?('https') then
+        parsed_url = URI.parse(url)
+        http = Net::HTTP.new(parsed_url.host, parsed_url.port)
+        http.use_ssl = true
+        request = Net::HTTP::Get.new(url)
+        response = http.start { |http| http.request(request) }
+      else
+        parsed_url = URI.parse(url)
+        request = Net::HTTP::Get.new(url)
+        response = Net::HTTP.start(parsed_url.host, parsed_url.port) { |http| http.request(request) }
+      end
       case response
       when Net::HTTPSuccess     then response.body
       when Net::HTTPRedirection then load_page(response['location'], limit - 1)
