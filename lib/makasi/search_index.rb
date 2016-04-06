@@ -7,6 +7,10 @@ module Makasi
       sync_db_with_sitemap
       puts "End Sync, starting parse and uploading pages"
       CloudSearchDocument.desc(:reindexed_at).each do |cloudsearch_doc|
+
+        #Makes the request pause 1.5 seconds (Workaround for rack-attack)
+        sleep 1.5
+
         html_content = load_page(cloudsearch_doc.url)
         html_doc = Nokogiri::HTML(html_content)
 
