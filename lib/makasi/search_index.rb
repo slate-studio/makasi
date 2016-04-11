@@ -11,6 +11,7 @@ module Makasi
         #Makes the request pause 1.5 seconds (Workaround for rack-attack)
         sleep 1.5
 
+        puts cloudsearch_doc.url
         html_content = load_page(cloudsearch_doc.url)
         html_doc = Nokogiri::HTML(html_content)
 
@@ -27,7 +28,6 @@ module Makasi
                              "\n\tRESOURCE_ID: "      + meta_tag_for(html_doc, "resource_id") +
                              "\n"
         end
-        puts cloudsearch_doc.url
         add_item_to_cloudsearch(cloudsearch_doc, html_doc)
 
         cloudsearch_doc.update_attributes(reindexed_at: DateTime.now)
@@ -72,21 +72,27 @@ module Makasi
         return ""
       end
 
-       url += "/" unless url.ends_with?("/")
-       if url.start_with?('https') then
-        parsed_url = URI.parse(url)
+      url += "/" unless url.ends_with?("/")
+      parsed_url = URI.parse(url)
+      if url.start_with?('https') then
         http = Net::HTTP.new(parsed_url.host, parsed_url.port)
         http.use_ssl = true
         request = Net::HTTP::Get.new(url)
         response = http.start { |http| http.request(request) }
       else
-        parsed_url = URI.parse(url)
         request = Net::HTTP::Get.new(url)
         response = Net::HTTP.start(parsed_url.host, parsed_url.port) { |http| http.request(request) }
       end
       case response
-      when Net::HTTPSuccess     then response.body
-      when Net::HTTPRedirection then load_page(response['location'], limit - 1)
+      when Net::HTTPSuccess
+        response.body
+      when Net::HTTPRedirection
+        if response['location'].start_with?('http') then
+          redirect_url = response['location']
+        else
+          redirect_url = "#{parsed_url.scheme}://#{parsed_url.host}#{response['location']}"
+        end
+        load_page(redirect_url, limit - 1)
       else
         Rails.logger.error "Makasi::SearchIndex ERROR: Faild load sitemap's url #{url}"
         return ""
