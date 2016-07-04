@@ -24,8 +24,8 @@ module Makasi
       rails_config.content_selector || "[data-indexable]"
     end
 
-    def self.resource_name_selector
-      rails_config.resource_name_selector || "[data-title]"
+    def self.resource_title_selector
+      rails_config.resource_title_selector || "[data-title]"
     end
 
     def self.cloudsearch_api_version
