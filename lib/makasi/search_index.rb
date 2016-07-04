@@ -24,7 +24,7 @@ module Makasi
                              "\n\tDESCRIPTION: "      + meta_tag_for(html_doc, "description")[0..300] +
                              "\n\tKEYWORDS: "         + meta_tag_for(html_doc, "keywords") +
                              "\n\tRESOURCE_TYPE: "    + meta_tag_for(html_doc, "resource_type") +
-                             "\n\tRESOURCE_NAME: "    + resource_name_of(html_doc) +
+                             "\n\tRESOURCE_TITLE: "   + resource_title_of(html_doc) +
                              "\n\tRESOURCE_ID: "      + meta_tag_for(html_doc, "resource_id") +
                              "\n"
         end
@@ -44,7 +44,7 @@ module Makasi
         description:      meta_tag_for(html_doc, "description")[0..MAX_TEXT_SIZE],
         keywords:         meta_tag_for(html_doc, "keywords").split(",").map(&:strip),
         resource_type:    meta_tag_for(html_doc, "resource_type")[0..MAX_TEXT_SIZE],
-        resource_name:    resource_name_of(html_doc)[0..MAX_TEXT_SIZE],
+        resource_title:   resource_title_of(html_doc)[0..MAX_TEXT_SIZE],
         resource_id:      meta_tag_for(html_doc, "resource_id")[0..MAX_TEXT_SIZE]
       })
     end
@@ -147,8 +147,8 @@ module Makasi
       HTMLEntities.new.decode content.string.gsub(/\s+/, " ").strip
     end
 
-    def resource_name_of(doc)
-      content_nodes = doc.css(Makasi::Config.resource_name_selector)
+    def resource_title_of(doc)
+      content_nodes = doc.css(Makasi::Config.resource_title_selector)
       if content_nodes.present?
         HTMLEntities.new.decode content_nodes.map(&:text).join(" ")
       else
