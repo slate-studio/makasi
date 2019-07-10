@@ -35,5 +35,9 @@ module Makasi
     def self.cloudsearch_aws_region
       rails_config.cloudsearch_aws_region.presence || "us-east-1"
     end
+
+    def self.resource_name_selector
+      rails_config.resource_name_selector || "[data-title]"
+    end
   end
 end
