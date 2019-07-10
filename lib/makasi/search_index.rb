@@ -72,7 +72,8 @@ module Makasi
         return ""
       end
 
-      url += "/" unless url.ends_with?("/")
+      # we redirected all the url which end with / to url with no / at the end of the url from application.rb - so the next line will failed to load url as the response: HTTPMovedPermanently
+      # url += "/" unless url.ends_with?("/")
       parsed_url = URI.parse(url)
       if url.start_with?('https') then
         http = Net::HTTP.new(parsed_url.host, parsed_url.port)
